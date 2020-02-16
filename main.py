@@ -19,6 +19,17 @@ from nvidia.dali.plugin.pytorch import DALIGenericIterator
 from data import ImagePipeline
 import network
 
+from pydrive.auth import GoogleAuth
+from pydrive.drive import GoogleDrive
+from google.colab import auth
+from oauth2client.client import GoogleCredentials
+
+auth.authenticate_user()
+gauth = GoogleAuth()
+gauth.credentials = GoogleCredentials.get_application_default()
+drive = GoogleDrive(gauth)
+print("Drive Okay")
+
 np.random.seed(42)
 random.seed(10)
 torch.backends.cudnn.deterministic = True
@@ -142,3 +153,9 @@ for epoch in range(30):
 
     # Save the pre-trained Generator as well
     torch.save(netG,'output/netG_%d.pt' % epoch)
+    if epoch % 5 == 0:
+        strinD = 'netG_{}.pt'.format(epoch)
+        strinD_Path = '/content/output/netG_{}.pt'.format(epoch)
+        uploaded = drive.CreateFile({'title': strinD})
+        uploaded.SetContentFile(strinD_Path)
+        uploaded.Upload()
